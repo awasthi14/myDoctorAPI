@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 
-const password = "ankit";
+const password = "arpit";
 
 bcrypt.genSalt(10, (err, salt) => {
   if (err) throw err;

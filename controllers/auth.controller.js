@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const db = require("../config/db");
 const { apiSuccess, apiError } = require("../utils/apiResponse");
+const { generateToken } = require('../utils/jwtHelper'); // adjust path
+
 
 // REGISTER CONTROLLER
 exports.register = async (req, res) => {
@@ -65,6 +67,8 @@ exports.login = async (req, res) => {
       return res.status(401).json(apiError("Invalid credentials"));
     }
 
+    const token = generateToken(user);
+
     // 3. Send success response (token will be added later)
     const userData = {
       id: user.id,
@@ -74,8 +78,13 @@ exports.login = async (req, res) => {
       phone: user.phone,
     };
 
-    console.log("✅ Login successful:", userData);
-    return res.status(200).json(apiSuccess("Login successful", userData));
+    const loginSuccess = {
+      user: userData,
+      token: token, // ✅ include in response
+    }
+
+    console.log("✅ Login successful:", loginSuccess);
+    return res.status(200).json(apiSuccess("Login successful", loginSuccess));
   } catch (err) {
     console.error("❌ Error during login:", err);
     return res.status(500).json(apiError("Something went wrong during login"));

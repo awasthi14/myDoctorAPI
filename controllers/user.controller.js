@@ -7,7 +7,7 @@ exports.getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [rows] = await db.promise().query(
+    const [rows] = await db.query(
       'SELECT id, name, email, role FROM users WHERE id = ?',
       [userId]
     );
@@ -56,7 +56,7 @@ exports.updateUser = async (req, res) => {
 
     values.push(userId); // for WHERE clause
 
-    const [result] = await db.promise().query(
+    const [result] = await db.query(
       `UPDATE users SET ${fieldsToUpdate.join(', ')} WHERE id = ?`,
       values
     );
