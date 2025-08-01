@@ -10,23 +10,28 @@ exports.createAppointment = async (req, res) => {
   try {
     const [result] = await db.execute(
       `INSERT INTO appointments 
-       (doctor_id, patient_id, appointment_date, appointment_time, status)
-       VALUES (?, ?, ?, ?, ?)`,
-      [doctor_id, patient_id, appointment_date, appointment_time, 'Scheduled']
+       (doctor_id, patient_id, appointment_date, appointment_time, time_slot, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [doctor_id, patient_id, appointment_date, appointment_time, appointment_time, 'PENDING']
     );
 
     // Fetch doctor & patient info for email
-    const [[doctor]] = await db.execute("SELECT name, email FROM doctors WHERE id = ?", [doctor_id]);
-    const [[patient]] = await db.execute("SELECT name, email FROM patients WHERE id = ?", [patient_id]);
+    // const [[doctor]] = await db.execute("SELECT name, email FROM doctors WHERE id = ?", [doctor_id]);
+    // const [[patient]] = await db.execute("SELECT name, email FROM patients WHERE id = ?", [patient_id]);
 
     // Send confirmation email
-    const html = appointmentConfirmationTemplate(doctor.name, patient.name, appointment_date, appointment_time);
-    await sendEmail(patient.email, "Appointment Confirmed", html);
+    // const html = appointmentConfirmationTemplate('Ankit', 'Arpit', appointment_date, appointment_time);
+    // // await sendEmail(patient.email, "Appointment Confirmed", html);
+    // await sendEmail.sendDoctorWelcomeEmail('ankit.14awasthi@gmail.com', "Appointment Confirmed", html);
 
+    // const response = apiSuccess(res, "Appointment created and email sent", { appointmentId: result.insertId });
+    // return res.status(200).json(response);
     return apiSuccess(res, "Appointment created and email sent", { appointmentId: result.insertId });
   } catch (err) {
     console.error("Error in createAppointment:", err);
-    return apiError(res, "Failed to book appointment", 500, err);
+    // const response = apiError(res, "Failed to book appointment", 500, err);
+    // return res.status(500).json(response);
+    return apiError("Failed to book appointment", 500, err.message);
 }
 
 };

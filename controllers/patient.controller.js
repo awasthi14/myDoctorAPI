@@ -18,7 +18,7 @@ exports.createPatient = async (req, res) => {
 // ✅ Get all patients
 exports.getAllPatients = async (req, res) => {
   try {
-    const [patients] = await db.execute("SELECT * FROM patients");
+    const [patients] = await db.execute("SELECT p.id AS id, u.name AS name FROM patients p JOIN users u ON p.user_id = u.id");
     return apiSuccess(res, "Patients fetched successfully", patients);
   } catch (err) {
     return apiError(res, "Failed to fetch patients", 500, err);

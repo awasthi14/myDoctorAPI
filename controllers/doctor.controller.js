@@ -34,7 +34,7 @@ exports.addDoctor = async (req, res) => {
 // Get all doctors
 exports.getAllDoctors = async (req, res) => {
   try {
-    const [rows] = await db.execute("SELECT * FROM doctors");
+    const [rows] = await db.execute("SELECT d.id AS id, u.name AS name FROM doctors d JOIN users u ON d.user_id = u.id");
     return apiSuccess(res, "Doctors retrieved", rows);
   } catch (err) {
     console.error("DoctorController - getAllDoctors:", err);

@@ -38,10 +38,10 @@ exports.register = async (req, res) => {
     };
 
     console.log("✅ User registered:", insertedUser);
-    return res.status(201).json(apiSuccess("User registered successfully", insertedUser));
+    return apiSuccess(res, "User registered successfully", insertedUser, 201);
   } catch (err) {
     console.error("❌ Error during registration:", err);
-    return res.status(500).json(apiError("Something went wrong during registration"));
+    return apiError(res, "Something went wrong during registration", 500);
   }
 };
 
@@ -84,9 +84,9 @@ exports.login = async (req, res) => {
     }
 
     console.log("✅ Login successful:", loginSuccess);
-    return res.status(200).json(apiSuccess("Login successful", loginSuccess));
+    return apiSuccess(res, "Login successful", loginSuccess);
   } catch (err) {
     console.error("❌ Error during login:", err);
-    return res.status(500).json(apiError("Something went wrong during login"));
+    return apiError(res, "Something went wrong during login");
   }
 };
