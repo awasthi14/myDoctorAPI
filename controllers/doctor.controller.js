@@ -2,26 +2,67 @@ const db = require("../config/db"); // already db.promise() in dbpool.js
 const { apiSuccess, apiError } = require("../utils/apiResponse");
 
 // Add a new doctor
+// exports.addDoctor = async (req, res) => {
+//   const { name, specialization, experience, contact, email } = req.body;
+
+//   if (!name || !specialization || !experience || !contact || !email) {
+//     return apiError(res, "All fields are required", 400);
+//   }
+
+//   if (isNaN(experience)) {
+//     return apiError(res, "Experience must be a number", 400);
+//   }
+
+//   try {
+//     const [existing] = await db.execute("SELECT * FROM doctors WHERE email = ?", [email]);
+//     if (existing.length > 0) {
+//       return apiError(res, "Doctor with this email already exists", 400);
+//     }
+
+//     await db.execute(
+//       "INSERT INTO doctors (name, specialization, experience, contact, email) VALUES (?, ?, ?, ?, ?)",
+//       [name, specialization, experience, contact, email]
+//     );
+
+//     return apiSuccess(res, "Doctor added successfully");
+//   } catch (err) {
+//     console.error("DoctorController - addDoctor:", err);
+//     return apiError(res, "Failed to add doctor", 500, err);
+//   }
+// };
+
 exports.addDoctor = async (req, res) => {
-  const { name, specialization, experience, contact, email } = req.body;
+  const { name, specialization, email } = req.body;
 
-  if (!name || !specialization || !experience || !contact || !email) {
-    return apiError(res, "All fields are required", 400);
-  }
-
-  if (isNaN(experience)) {
-    return apiError(res, "Experience must be a number", 400);
+  if (!name || !specialization || !email) {
+    return apiError(res, "Name, specialization, and email are required", 400);
   }
 
   try {
-    const [existing] = await db.execute("SELECT * FROM doctors WHERE email = ?", [email]);
+    // Check if email already exists in users table
+    const [existing] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
     if (existing.length > 0) {
       return apiError(res, "Doctor with this email already exists", 400);
     }
 
+    // Insert into users table
+    const password = "$2b$10$kYz817OniiscZCd013WVnebVd/Hz3/2oyEjUjxRwPnktukNeC6yuy"; // default password - 1234
+    const phone = "9999999999";               // Hardcoded phone
+    const role = "DOCTOR";
+
+    const [userResult] = await db.execute(
+      "INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)",
+      [name, email, password, role, phone]
+    );
+
+    const userId = userResult.insertId;
+
+    // Insert into doctors table
+    const bio = "Experienced in the medical field."; // Hardcoded bio
+
     await db.execute(
-      "INSERT INTO doctors (name, specialization, experience, contact, email) VALUES (?, ?, ?, ?, ?)",
-      [name, specialization, experience, contact, email]
+      "INSERT INTO doctors (user_id, specialization, bio) VALUES (?, ?, ?)",
+      [userId, specialization, bio]
     );
 
     return apiSuccess(res, "Doctor added successfully");
@@ -30,6 +71,7 @@ exports.addDoctor = async (req, res) => {
     return apiError(res, "Failed to add doctor", 500, err);
   }
 };
+
 
 // Get all doctors
 exports.getAllDoctors = async (req, res) => {

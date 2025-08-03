@@ -2,18 +2,56 @@ const db = require("../config/db");
 const { apiSuccess, apiError } = require("../utils/apiResponse");
 
 // ✅ Create a new patient
+// exports.createPatient = async (req, res) => {
+//   const { name, age, gender, contact, email } = req.body;
+//   try {
+//     const [result] = await db.execute(
+//       "INSERT INTO patients (name, age, gender, contact, email) VALUES (?, ?, ?, ?, ?)",
+//       [name, age, gender, contact, email]
+//     );
+//     return apiSuccess(res, "Patient added successfully", { patientId: result.insertId });
+//   } catch (err) {
+//     return apiError(res, "Failed to add patient", 500, err);
+//   }
+// };
+
 exports.createPatient = async (req, res) => {
-  const { name, age, gender, contact, email } = req.body;
+  const { name, email, age } = req.body;
+
+  if (!name || !email) {
+    return apiError(res, "Name and email are required", 400);
+  }
+
   try {
-    const [result] = await db.execute(
-      "INSERT INTO patients (name, age, gender, contact, email) VALUES (?, ?, ?, ?, ?)",
-      [name, age, gender, contact, email]
+    // Check if email already exists in users
+    const [existing] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
+    if (existing.length > 0) {
+      return apiError(res, "Patient with this email already exists", 400);
+    }
+
+    // Insert into users table
+    const password = "$2b$10$kYz817OniiscZCd013WVnebVd/Hz3/2oyEjUjxRwPnktukNeC6yuy"; // default password - 1234
+    const phone = "8888888888";   // hardcoded
+    const role = "PATIENT";
+
+    const [userResult] = await db.execute(
+      "INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)",
+      [name, email, password, role, phone]
     );
-    return apiSuccess(res, "Patient added successfully", { patientId: result.insertId });
+
+    const userId = userResult.insertId;
+
+    // Insert into patients table (with hardcoded age = 20)
+    // const age = 20;
+    await db.execute("INSERT INTO patients (user_id, age) VALUES (?, ?)", [userId, age]);
+
+    return apiSuccess(res, "Patient added successfully");
   } catch (err) {
+    console.error("PatientController - addPatient:", err);
     return apiError(res, "Failed to add patient", 500, err);
   }
 };
+
 
 // ✅ Get all patients
 exports.getAllPatients = async (req, res) => {
