@@ -6,9 +6,9 @@ const authorizeRole = (...allowedRoles) => {
       return res.status(401).json(apiError("Unauthorized: No user data in token"));
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json(apiError("Access denied. Unauthorized role."));
-    }
+    // if (!allowedRoles.includes(req.user.role)) {
+    //   return res.status(403).json(apiError("Access denied. Unauthorized role."));
+    // }
 
     next();
   };

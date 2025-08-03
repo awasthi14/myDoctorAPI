@@ -34,7 +34,7 @@ exports.addDoctor = async (req, res) => {
 // Get all doctors
 exports.getAllDoctors = async (req, res) => {
   try {
-    const [rows] = await db.execute("SELECT d.id AS id, u.name AS name FROM doctors d JOIN users u ON d.user_id = u.id");
+    const [rows] = await db.execute("SELECT d.id AS id, u.name AS name, d.specialization, u.email as email FROM doctors d JOIN users u ON d.user_id = u.id");
     return apiSuccess(res, "Doctors retrieved", rows);
   } catch (err) {
     console.error("DoctorController - getAllDoctors:", err);
@@ -63,31 +63,28 @@ exports.getDoctorById = async (req, res) => {
 // Update doctor
 exports.updateDoctor = async (req, res) => {
   const doctorId = req.params.id;
-  const { name, specialization, experience, contact, email } = req.body;
+  const { name, specialization, email } = req.body;
 
-  if (!name || !specialization || !experience || !contact || !email) {
+  if (!name || !specialization || !email) {
     return apiError(res, "All fields are required", 400);
   }
 
-  if (isNaN(experience)) {
-    return apiError(res, "Experience must be a number", 400);
+try {
+  const [result] = await db.execute(
+    "UPDATE doctors d JOIN users u ON d.user_id = u.id SET u.name = ?, u.email = ?, d.specialization = ? WHERE d.id = ?",
+    [name, email, specialization, doctorId]
+  );
+
+  if (result.affectedRows === 0) {
+    return apiError(res, "Doctor not found", 404);
   }
 
-  try {
-    const [result] = await db.execute(
-      "UPDATE doctors SET name = ?, specialization = ?, experience = ?, contact = ?, email = ? WHERE id = ?",
-      [name, specialization, experience, contact, email, doctorId]
-    );
+  return apiSuccess(res, "Doctor updated successfully");
+} catch (err) {
+  console.error("DoctorController - updateDoctor:", err);
+  return apiError(res, "Failed to update doctor", 500, err);
+}
 
-    if (result.affectedRows === 0) {
-      return apiError(res, "Doctor not found", 404);
-    }
-
-    return apiSuccess(res, "Doctor updated successfully");
-  } catch (err) {
-    console.error("DoctorController - updateDoctor:", err);
-    return apiError(res, "Failed to update doctor", 500, err);
-  }
 };
 
 // Delete doctor
