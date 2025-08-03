@@ -18,7 +18,7 @@ exports.createPatient = async (req, res) => {
 // ✅ Get all patients
 exports.getAllPatients = async (req, res) => {
   try {
-    const [patients] = await db.execute("SELECT p.id AS id, u.name AS name FROM patients p JOIN users u ON p.user_id = u.id");
+    const [patients] = await db.execute("SELECT p.id AS id, p.age AS age, u.name AS name, u.email AS email FROM patients p JOIN users u ON p.user_id = u.id");
     return apiSuccess(res, "Patients fetched successfully", patients);
   } catch (err) {
     return apiError(res, "Failed to fetch patients", 500, err);
@@ -42,11 +42,11 @@ exports.getPatientById = async (req, res) => {
 // ✅ Update patient
 exports.updatePatient = async (req, res) => {
   const patientId = req.params.id;
-  const { name, age, gender, contact, email } = req.body;
+  const { name, age, email } = req.body;
   try {
     const [result] = await db.execute(
-      "UPDATE patients SET name = ?, age = ?, gender = ?, contact = ?, email = ? WHERE id = ?",
-      [name, age, gender, contact, email, patientId]
+      "UPDATE patients p JOIN users u ON p.user_id = u.id SET u.name = ?, u.email = ?, p.age = ? WHERE p.id = ?",
+      [name, email, age, patientId]
     );
     if (result.affectedRows === 0) {
       return apiError(res, "Patient not found", 404);
