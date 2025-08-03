@@ -60,6 +60,51 @@ exports.getDoctorById = async (req, res) => {
   }
 };
 
+// Get doctor by userID
+exports.getDoctorByUserId = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const rows = await db.execute("SELECT * FROM doctors WHERE user_id = ?", [userId]);
+
+    // if (rows.length === 0) {
+    //   return apiError(res, "Doctor not found", 404);
+    // }
+
+    return apiSuccess(res, "Doctor found", rows[0]);
+  } catch (err) {
+    console.error("DoctorController - getDoctorByUserId:", err);
+    return apiError(res, "Failed to fetch doctor", 500, err);
+  }
+};
+
+// Update doctor base on userId
+exports.updateDoctorBaseOnUserId = async (req, res) => {
+  const doctorId = req.params.id;
+  const { name, specialization, email } = req.body;
+
+  if (!name || !specialization || !email) {
+    return apiError(res, "All fields are required", 400);
+  }
+
+try {
+  const [result] = await db.execute(
+    "UPDATE doctors d JOIN users u ON d.user_id = u.id SET u.name = ?, u.email = ?, d.specialization = ? WHERE u.id = ?",
+    [name, email, specialization, doctorId]
+  );
+
+  if (result.affectedRows === 0) {
+    return apiError(res, "Doctor not found", 404);
+  }
+
+  return apiSuccess(res, "Doctor updated successfully");
+} catch (err) {
+  console.error("DoctorController - updateDoctor:", err);
+  return apiError(res, "Failed to update doctor", 500, err);
+}
+
+};
+
 // Update doctor
 exports.updateDoctor = async (req, res) => {
   const doctorId = req.params.id;

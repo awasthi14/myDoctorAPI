@@ -8,6 +8,8 @@ const {
   addDoctor,
   getAllDoctors,
   getDoctorById,
+  getDoctorByUserId,
+  updateDoctorBaseOnUserId,
   updateDoctor,
   deleteDoctor,
   getDoctorProfile,
@@ -23,8 +25,14 @@ router.get('/', getAllDoctors);
 // Public: Get doctor by ID
 router.get('/:id', getDoctorById);
 
+// Public: Get doctor by ID
+router.get('/user/:id', getDoctorByUserId);
+
 // Admin: Update doctor
 router.put('/:id', verifyToken, authorizeRole('Admin'), updateDoctor);
+
+// Admin: Update doctor base on userId
+router.put('/user/:id', verifyToken, authorizeRole('Admin'), updateDoctorBaseOnUserId);
 
 // Admin: Delete doctor
 router.delete('/:id', verifyToken, authorizeRole('Admin'), deleteDoctor);

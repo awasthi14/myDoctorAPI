@@ -14,6 +14,10 @@ router.get('/:id', appointmentController.getAppointmentById);
 // Get a user appointment by userID
 router.get('/patient/:id', appointmentController.getAppointmentByUserId);
 
+
+// Get a user appointment by userID
+router.get('/user/:id', appointmentController.getAppointmentByDoctorUserId);
+
 // Update an appointment by ID
 router.put('/:id', appointmentController.updateAppointment);
 

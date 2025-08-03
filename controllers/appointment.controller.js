@@ -107,6 +107,34 @@ exports.getAppointmentByUserId = async (req, res) => {
   }
 };
 
+// Get Appointments by Doctor's user_id
+exports.getAppointmentByDoctorUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+          a.id AS appointment_id,
+          a.appointment_date as appointment_date,
+          a.time_slot as time,
+          a.status,
+          up.name AS patientName,
+          ud.name AS doctor_name
+        FROM appointments a
+        JOIN patients p ON a.patient_id = p.id
+        JOIN users up ON p.user_id = up.id
+        JOIN doctors d ON a.doctor_id = d.id
+        JOIN users ud ON d.user_id = ud.id
+        WHERE d.user_id = ?`,
+      [userId]
+    );
+
+    if (rows.length === 0) return apiSuccess(res, "Appointment fetched", []);
+    return apiSuccess(res, "Appointment fetched", rows);
+  } catch (error) {
+    return apiError(res, "Failed to fetch appointment", 500, error);
+  }
+};
+
 
 // Update Appointment
 exports.updateAppointment = async (req, res) => {
