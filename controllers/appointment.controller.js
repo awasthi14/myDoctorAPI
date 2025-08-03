@@ -40,11 +40,18 @@ exports.createAppointment = async (req, res) => {
 exports.getAllAppointments = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT a.*, d.name AS doctor_name, p.name AS patient_name
-       FROM appointments a
-       JOIN doctors d ON a.doctor_id = d.id
-       JOIN patients p ON a.patient_id = p.id
-       ORDER BY a.appointment_date, a.appointment_time`
+      `SELECT 
+        a.id AS appointment_id,
+        a.appointment_date,
+        a.time_slot,
+        a.status,
+        up.name AS patient_name,
+        ud.name AS doctor_name
+      FROM appointments a
+      JOIN patients p ON a.patient_id = p.id
+      JOIN users up ON p.user_id = up.id
+      JOIN doctors d ON a.doctor_id = d.id
+      JOIN users ud ON d.user_id = ud.id`
     );
     return apiSuccess(res, "All appointments fetched", rows);
   } catch (error) {
@@ -71,6 +78,35 @@ exports.getAppointmentById = async (req, res) => {
     return apiError(res, "Failed to fetch appointment", 500, error);
   }
 };
+
+// Get Appointments by userID
+exports.getAppointmentByUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+        a.id AS appointment_id,
+        a.appointment_date,
+        a.time_slot,
+        a.status,
+        up.name AS patient_name,
+        ud.name AS doctor_name
+      FROM appointments a
+      JOIN patients p ON a.patient_id = p.id
+      JOIN users up ON p.user_id = up.id
+      JOIN doctors d ON a.doctor_id = d.id
+      JOIN users ud ON d.user_id = ud.id
+      WHERE up.id = ?`,
+      [userId]
+    );
+
+    if (rows.length === 0) return apiSuccess(res, "Appointment fetched", []);
+    return apiSuccess(res, "Appointment fetched", rows);
+  } catch (error) {
+    return apiError(res, "Failed to fetch appointment", 500, error);
+  }
+};
+
 
 // Update Appointment
 exports.updateAppointment = async (req, res) => {

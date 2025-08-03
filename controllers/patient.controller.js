@@ -39,6 +39,20 @@ exports.getPatientById = async (req, res) => {
   }
 };
 
+// ✅ Get patient by userID
+exports.getPatientByUserId = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const [patient] = await db.execute("SELECT * FROM patients WHERE user_id = ?", [userId]);
+    if (patient.length === 0) {
+      return apiSuccess(res, "Patient not found", {});
+    }
+    return apiSuccess(res, "Patient fetched successfully", patient[0]);
+  } catch (err) {
+    return apiError(res, "Failed to fetch patient", 500, err);
+  }
+};
+
 // ✅ Update patient
 exports.updatePatient = async (req, res) => {
   const patientId = req.params.id;

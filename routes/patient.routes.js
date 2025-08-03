@@ -13,6 +13,10 @@ router.get("/", patientController.getAllPatients);
 // ✅ Get patient by ID
 router.get("/:id", patientController.getPatientById);
 
+// ✅ Get patient by userID
+router.get("/user/:id", patientController.getPatientByUserId);
+
+
 // ✅ Update patient
 router.put("/:id", patientController.updatePatient);
 

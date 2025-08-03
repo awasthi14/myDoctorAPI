@@ -11,6 +11,9 @@ router.get('/', appointmentController.getAllAppointments);
 // Get a specific appointment by ID
 router.get('/:id', appointmentController.getAppointmentById);
 
+// Get a user appointment by userID
+router.get('/patient/:id', appointmentController.getAppointmentByUserId);
+
 // Update an appointment by ID
 router.put('/:id', appointmentController.updateAppointment);
 
